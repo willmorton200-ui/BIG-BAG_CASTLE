@@ -1,0 +1,27 @@
+# Зависимости
+node_modules/
+
+# Сборка
+dist/
+dist-ssr/
+*.local
+
+# Логи и кэш
+tsconfig.tsbuildinfo
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+
+# Редакторы и ОС
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Окружение
+.env
+.env*.local
