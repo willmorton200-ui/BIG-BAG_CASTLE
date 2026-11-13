@@ -1,0 +1,42 @@
+[
+  {
+    "id": "quartz_sand",
+    "name": "Кварцевый песок",
+    "shortName": "Песок",
+    "densityRangeKgM3": [1500, 1650, 1550],
+    "minBarrierThicknessM": 0.8,
+    "bagRecommendation": "Двухслойная УФ-стабилизированная ткань 160–200 г/м² или ПЭ-вкладыш",
+    "ballisticNotes": "Максимальная баллистическая стойкость; барьер 0,8–1,0 м гасит осколки; склонен к слеживанию при намокании (обязателен полог).",
+    "requiresTwoLayerOrLiner": true
+  },
+  {
+    "id": "mineral_soil",
+    "name": "Минеральный грунт / глина",
+    "shortName": "Грунт/глина",
+    "densityRangeKgM3": [1200, 1400, 1300],
+    "minBarrierThicknessM": null,
+    "bagRecommendation": "Однослойная УФ-стабилизированная ткань 120–160 г/м²",
+    "ballisticNotes": "Средняя стойкость; оптимален для длинных обвалований; подвержен морозному пучению при увлажнении.",
+    "requiresTwoLayerOrLiner": false
+  },
+  {
+    "id": "granite_crushed_stone",
+    "name": "Гранитный щебень (фр. 5–20 мм)",
+    "shortName": "Щебень 5–20",
+    "densityRangeKgM3": [1400, 1550, 1480],
+    "minBarrierThicknessM": null,
+    "bagRecommendation": "Ткань повышенной плотности 160–200 г/м² (размер кусков строго < 250 мм)",
+    "ballisticNotes": "Высокая прочность и инертность к осадкам; рекомендован для нижних опорных ярусов, но может давать вторичные осколки при прямом ударе.",
+    "requiresTwoLayerOrLiner": false
+  },
+  {
+    "id": "expanded_clay",
+    "name": "Керамзитовый гравий (фр. 20–40 мм, М200–М400)",
+    "shortName": "Керамзит",
+    "densityRangeKgM3": [250, 400, 350],
+    "minBarrierThicknessM": null,
+    "bagRecommendation": "Однослойная ткань 120–140 г/м²",
+    "ballisticNotes": "Умеренная стойкость, низкая гигроскопичность (< 10%); применяется на эстакадах, перекрытиях и слабых основаниях с ограничением нагрузки.",
+    "requiresTwoLayerOrLiner": false
+  }
+]
