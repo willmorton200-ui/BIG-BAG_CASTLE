@@ -109,7 +109,7 @@ describe('BIG-BAG_CASTLE Calculator — Verification against Section 2.3 Table',
     expect(res.checks.some((c) => c.code === 'CHK_CREST_BALLISTIC')).toBe(true);
   });
 
-  it('Row 6: 100x100x100 (БИГБАГТАРА, SWL 1.0t) fails CHK_STACK_LIMIT (5 tiers > 4)', () => {
+  it('Row 6: 100x100x100 (БИГБАГТАРА, SWL 1.0t) yields 5 tiers with WARNING (CHK_STACK_HIGH & CHK_UNDERFILLED_BAG)', () => {
     const input = createDefaultInput();
     const res = calculateVariant(findBag('bigbagtara_100_100_100'), input, quartzSand);
 
@@ -122,8 +122,9 @@ describe('BIG-BAG_CASTLE Calculator — Verification against Section 2.3 Table',
     expect(res.nBagsDiscrete).toBe(1080);
     expect(res.totalFillerM3).toBeCloseTo(696.8, 1);
     expect(res.totalFillerTons).toBeCloseTo(1080.0, 1);
-    expect(res.status).toBe('INVALID');
-    expect(res.checks.some((c) => c.code === 'CHK_STACK_LIMIT')).toBe(true);
+    expect(res.status).toBe('WARNING');
+    expect(res.checks.some((c) => c.code === 'CHK_STACK_HIGH')).toBe(true);
+    expect(res.checks.some((c) => c.code === 'CHK_UNDERFILLED_BAG')).toBe(true);
   });
 
   it('supports object contour mode (Mode B) and calculates centerline perimeter correctly', () => {

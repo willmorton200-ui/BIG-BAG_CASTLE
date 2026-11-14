@@ -212,22 +212,37 @@ export function calculateVariant(
       : 90;
 
   // Этап 4. Матрица автоматических инженерных проверок
-  const allowedMaxTiers =
-    bag.maxStackTiers > 0
-      ? Math.min(bag.maxStackTiers, getAllowedMaxTiersByVolume(vNominalM3))
-      : getAllowedMaxTiersByVolume(vNominalM3);
-
+  const allowedMaxTiers = 5;
   const checks: EngineeringCheck[] = [];
 
-  if (tiersCount > allowedMaxTiers) {
+  // 1. Проверка предельной ярусности для мягких геооболочек в связанной трапеции:
+  // - До 4 ярусов включительно: стандартная штатная ярусность ЗОК (боковой распор в пределах прочности ткани 160-180 г/м²).
+  // - 5 ярусов: предельная ярусность для стандартных МКР (WARNING).
+  // - Более 5 ярусов: недопустимо для стандартных МКР (INVALID: риск разрыва ткани нижнего яруса от бокового распора).
+  if (tiersCount > 5) {
     checks.push({
       code: 'CHK_STACK_LIMIT',
       level: 'INVALID',
-      message: `Превышен допустимый предел штабелирования: требуется ${tiersCount} яр. при максимуме ${allowedMaxTiers} яр. для объёма ${vNominalM3.toFixed(2)} м³ (риск потери устойчивости штабеля).`,
+      message: `Сверхвысокая ярусность (${tiersCount} яр. > 5 яр., H = ${hTotalFactM.toFixed(2)} м): превышен предел прочности стандартной полипропиленовой ткани на боковой распор грунтового массива (T > 20 кН/м по СП 22.13330 / механике грунтов). Стандартные упаковочные МКР неприменимы — требуются тяжёлые геоконтейнеры (ткань >= 300 г/м², разрыв >= 60 кН/м) либо разделение насыпи на бермы.`,
+    });
+  } else if (tiersCount === 5) {
+    checks.push({
+      code: 'CHK_STACK_HIGH',
+      level: 'WARNING',
+      message: `Предельная ярусность (5 ярусов, H = ${hTotalFactM.toFixed(2)} м): повышенное распирающее давление на основание. Обязательны плотность ткани не менее 180–200 г/м², перевязка швов на 1/2 длины и связующая траншея 15 см.`,
     });
   }
 
-  // 1. Проверка проектного профиля основания к целевой высоте
+  // Предупреждение о превышении заводского складского лимита штабелирования (если в паспорте МКР он указан)
+  if (bag.maxStackTiers > 0 && tiersCount > bag.maxStackTiers && tiersCount <= 5) {
+    checks.push({
+      code: 'CHK_STACK_HIGH',
+      level: 'WARNING',
+      message: `Паспортный складской лимит одиночного штабелирования (${bag.maxStackTiers} яр.) превышен: требуется ${tiersCount} яр. В связанной трапеции ЗОК устойчивость обеспечивается откосами и перевязкой, но необходим контроль целостности швов нижнего яруса.`,
+    });
+  }
+
+  // 2. Проверка проектного профиля основания к целевой высоте
   const projectRatioWH = baseWidthM / minHeightM;
   if (projectRatioWH < 2.0 - 1e-6) {
     checks.push({
@@ -237,7 +252,7 @@ export function calculateVariant(
     });
   }
 
-  // 2. Проверка фактической устойчивости с учётом дискретности ярусов
+  // 3. Проверка фактической устойчивости с учётом дискретности ярусов
   if (actualRatioWH < 2.0 - 1e-6) {
     checks.push({
       code: 'CHK_CONSTRAINED_MODE',
@@ -271,6 +286,8 @@ export function calculateVariant(
     });
   }
 
+  // 4. Проверка степени наполнения мешка по высоте (проблема «мешка-чулка» при ограничении БРН)
+  const fillHeightRatioActual = hNom > 0 ? hFactM / hNom : 1.0;
   if (missingSwl) {
     checks.push({
       code: 'CHK_MISSING_SWL',
@@ -278,11 +295,18 @@ export function calculateVariant(
       message:
         'Паспортная БРН (SWL) отсутствует в справочнике (______________): расчёт выполнен только по геометрическому пределу 85%; требуется ручной ввод БРН.',
     });
+  } else if (fillHeightRatioActual < 0.65 - 1e-6) {
+    const emptyFabricCm = Math.round((hNom - hFactM) * 100);
+    checks.push({
+      code: 'CHK_UNDERFILLED_BAG',
+      level: 'WARNING',
+      message: `Недозаполнение по высоте: мешок заполнен всего на ${(fillHeightRatioActual * 100).toFixed(0)}% (${(hFactM * 100).toFixed(0)} см из ${(hNom * 100).toFixed(0)} см) из-за лимита БРН (${(effectiveSwlKg / 1000).toFixed(2)} т). Избыток пустой ткани (${emptyFabricCm} см) вызовет смятие складок и повышенную осадку ярусов. Рекомендуется МКР меньшей высоты либо с большей БРН (1.5–2.0 т).`,
+    });
   } else if (vSwlM3 !== null && vSwlM3 < v85M3 - 1e-6) {
     checks.push({
       code: 'CHK_SWL_BOTTLENECK',
       level: 'INFO',
-      message: `Заполнение ограничено паспортной БРН (${(effectiveSwlKg / 1000).toFixed(2)} т): мешок недозаполнен по высоте (${(hFactM * 100).toFixed(1)} см вместо ${(kH * hNom * 100).toFixed(1)} см); рассмотрите усиленный МКР.`,
+      message: `Заполнение ограничено паспортной БРН (${(effectiveSwlKg / 1000).toFixed(2)} т): мешок заполнен на ${(fillHeightRatioActual * 100).toFixed(0)}% высоты (${(hFactM * 100).toFixed(1)} см).`,
     });
   }
 

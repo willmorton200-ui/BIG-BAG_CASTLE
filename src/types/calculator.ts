@@ -98,6 +98,8 @@ export interface CalculationInput {
 export interface EngineeringCheck {
   code:
     | 'CHK_STACK_LIMIT'
+    | 'CHK_STACK_HIGH'
+    | 'CHK_UNDERFILLED_BAG'
     | 'CHK_TRAP_RATIO'
     | 'CHK_CONSTRAINED_MODE'
     | 'CHK_SINGLE_BAG_RATIO'
