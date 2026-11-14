@@ -1,0 +1,12 @@
+# Полный запрет индексации для всех поисковых систем
+User-agent: *
+Disallow: /
+
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
